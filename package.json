@@ -1,7 +1,7 @@
 {
-  "name": "redmine-me",
+  "name": "redmineme",
   "version": "0.0.1",
-  "description": "",
+  "description": "Track your Redmine times",
   "main": "src/bootstrap/index.js",
   "private": true,
   "engines": {
@@ -9,7 +9,10 @@
     "npm": ">= 6.4.1"
   },
   "scripts": {
-    "start": "electron .",
+    "start": "electron-forge start",
+    "make": "npm run build && electron-forge make",
+    "package": "npm run build && electron-forge package",
+    "publish": "electron-forge publish",
     "serve": "vue-cli-service serve --port 9005 ./src/flyout/index.js",
     "build": "vue-cli-service build ./src/flyout/index.js",
     "lint": "vue-cli-service lint",
@@ -18,8 +21,6 @@
     "build:watch": "vue-cli-service build ./src/flyout/index.js --watch --report",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "version": "npm run changelog && git add CHANGELOG.md",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
     "patch": "npm version patch -m \"release: %s\"",
     "minor": "npm version minor -m \"release: %s\"",
     "major": "npm version major -m \"release: %s\""
@@ -31,15 +32,63 @@
   "author": "Xavier Boubert",
   "license": "MIT",
   "homepage": "https://github.com/XavierBoubert/redmine-me#readme",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "redmine_me"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "xavierboubert",
+              "name": "redmine-me"
+            },
+            "prerelease": true
+          }
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  },
   "devDependencies": {
+    "@electron-forge/cli": "6.0.0-beta.39",
+    "@electron-forge/maker-deb": "6.0.0-beta.39",
+    "@electron-forge/maker-rpm": "6.0.0-beta.39",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.39",
+    "@electron-forge/maker-zip": "6.0.0-beta.39",
+    "@electron-forge/publisher-github": "^6.0.0-beta.39",
     "@vue/cli-plugin-babel": "^3.4.0",
     "@vue/cli-plugin-eslint": "^3.4.0",
     "@vue/cli-service": "^3.4.0",
     "@vue/eslint-config-airbnb": "^4.0.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-import-glob": "^2.0.0",
+    "electron": "5.0.2",
     "dotenv": "^6.2.0",
-    "electron": "^4.0.6",
     "eslint": "^5.8.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",

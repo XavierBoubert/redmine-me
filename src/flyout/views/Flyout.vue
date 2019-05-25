@@ -68,7 +68,7 @@ html, body {
     width: 40px;
     height: 40px;
     transform: translateY(-50%);
-    background: url(/img/logo.6c45c0be.png) no-repeat;
+    background: url("../assets/logo.png") no-repeat;
     background-size: 93%;
     background-position: center;
   }
