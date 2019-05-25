@@ -54,7 +54,7 @@ class FlyoutWin {
         icon: path.join(__dirname, './assets/logo.png'),
         width: (250 + 14),
         height: 74,
-        acceptFirstMouse: true,
+        acceptFirstMouse: false,
         transparent: true,
         frame: false,
         resizable: false,
@@ -64,6 +64,7 @@ class FlyoutWin {
         hasShadow: false,
         skipTaskbar: true,
         show: false,
+        webSecurity: false,
       });
 
       this.win.setMenu(null);

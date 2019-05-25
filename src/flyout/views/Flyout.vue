@@ -1,10 +1,14 @@
 <template>
-  <div class="flyout">
-
+  <div class="flyout" :class="{ error }">
     <span class="issue-help">I'm working on</span>
 
-    <input class="issue-id" type="text" value="88888">
-    <div class="issue-text">Le CMS de production supprime ses commentaires HTML</div>
+    <input ref="issueId" class="issue-id" type="text" v-model="issueId" @blur="refreshIssue">
+    <div
+      class="issue-text"
+      :class="{ empty: activeIssue.error || !activeIssue.text, error: activeIssue.error }"
+    >{{ activeIssue.error || activeIssue.text }}</div>
+
+    <div class="error-text">{{ error }}</div>
 
     <i class="sheet far fa-clock"></i>
     <i class="options fas fa-cog"></i>
@@ -14,8 +18,30 @@
 </template>
 
 <script>
+/* eslint-disable import/no-extraneous-dependencies */
+import { mapState } from 'vuex';
+import store from '@/services/store';
+
 export default {
   name: 'flyout',
+  store,
+  mounted() {
+    this.$refs.issueId.blur();
+  },
+  data() {
+    return {
+      error: null,
+      issueId: null,
+    };
+  },
+  computed: {
+    ...mapState('Redmine', ['activeIssue']),
+  },
+  methods: {
+    refreshIssue() {
+      this.$store.dispatch('Redmine/pullActiveIssue', this.issueId);
+    },
+  },
 };
 </script>
 
@@ -94,7 +120,7 @@ html, body {
   }
 
   .issue-text {
-    cursor: default;
+    cursor: pointer;
     user-select: none;
     position: absolute;
     left: 50px;
@@ -106,6 +132,32 @@ html, body {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+
+    &.empty {
+      cursor: default;
+    }
+
+    &.error {
+      color: #faa176;
+    }
+  }
+
+  .error-text {
+    position: absolute;
+    top: 10px;
+    left: 2px;
+    width: 200px;
+    color: #faa176;
+  }
+
+  &.error {
+    .issue-help, .issue-id, .issue-text {
+      display: none;
+    }
+
+    .error-text {
+      display: block;
+    }
   }
 
   .sheet, .options {
