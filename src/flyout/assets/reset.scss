@@ -1,0 +1,119 @@
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,
+big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,
+dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,
+canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,
+time,mark,audio,video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
+html {
+  line-height: 1;
+}
+
+html, body {
+  height: 100%;
+}
+
+ol,ul {
+  list-style: none;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+input, textarea, pre {
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  outline: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+caption, th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+q, blockquote {
+  quotes: none;
+}
+
+q:before, q:after, blockquote:before, blockquote:after {
+  content: "";
+  content: none;
+}
+
+a img {
+  border: 0;
+}
+
+article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary {
+  display: block;
+}
+
+*, *::after, *::before {
+  box-sizing: border-box;
+}
+
+.clear {
+  clear: both;
+}
+
+.clearfix::before, .clearfix::after {
+  content: '';
+  display: table;
+}
+
+.clearfix::after {
+  clear: both;
+}
+
+a {
+  color: var(--color-link);
+  cursor: pointer;
+  outline: 0;
+  text-decoration: none;
+}
+
+h4 {
+  font-weight: 700;
+  margin-bottom: .25em;
+  margin-top: 1em;
+}
+
+hr {
+  background-color: var(--color-hr);
+  clear: both;
+  color: var(--color-hr);
+  height: 2px;
+}
+
+hr.sep {
+  background-color: var(--color-hr);
+  border: 0;
+  clear: both;
+  color: var(--color-hr);
+  height: 2px;
+  margin-bottom: 20px;
+}
+
+strong {
+  font-weight: 700;
+}
+
+img {
+  max-width: 100%;
+}

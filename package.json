@@ -1,0 +1,95 @@
+{
+  "name": "redmine-me",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/bootstrap/index.js",
+  "private": true,
+  "engines": {
+    "node": ">= 10.13.0",
+    "npm": ">= 6.4.1"
+  },
+  "scripts": {
+    "start": "electron .",
+    "serve": "vue-cli-service serve --port 9005 ./src/flyout/index.js",
+    "build": "vue-cli-service build ./src/flyout/index.js",
+    "lint": "vue-cli-service lint",
+    "lint:fix": "vue-cli-service lint --fix",
+    "build:report": "vue-cli-service build ./src/flyout/index.js --mode development --report",
+    "build:watch": "vue-cli-service build ./src/flyout/index.js --watch --report",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "version": "npm run changelog && git add CHANGELOG.md",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "patch": "npm version patch -m \"release: %s\"",
+    "minor": "npm version minor -m \"release: %s\"",
+    "major": "npm version major -m \"release: %s\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/xavierboubert/redmine-me.git"
+  },
+  "author": "Xavier Boubert",
+  "license": "MIT",
+  "homepage": "https://github.com/XavierBoubert/redmine-me#readme",
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.4.0",
+    "@vue/cli-plugin-eslint": "^3.4.0",
+    "@vue/cli-service": "^3.4.0",
+    "@vue/eslint-config-airbnb": "^4.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-import-glob": "^2.0.0",
+    "dotenv": "^6.2.0",
+    "electron": "^4.0.6",
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.11.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "vue": "^2.5.22",
+    "vue-template-compiler": "^2.5.21",
+    "vuex": "^3.0.1"
+  },
+  "babel": {
+    "presets": [
+      "@vue/app"
+    ],
+    "plugins": [
+      "import-glob"
+    ]
+  },
+  "browserslist": [
+    "last 4 Chrome versions"
+  ],
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "@vue/airbnb"
+    ],
+    "globals": {
+      "describe": true,
+      "it": true,
+      "expect": true,
+      "after": true,
+      "before": true,
+      "afterEach": true,
+      "beforeEach": true,
+      "jest": true
+    },
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  }
+}
