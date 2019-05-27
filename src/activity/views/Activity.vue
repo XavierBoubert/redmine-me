@@ -1,12 +1,12 @@
 <template>
-  <div class="activity">
+  <div class="activity" :class="[ status ]">
     <div class="table">
       <div class="thead">
         <div class="th">Task</div>
         <div class="th"></div>
         <div class="th">Real time</div>
         <div class="th">Activity</div>
-        <div class="th">Time to log</div>
+        <div class="th">Hours to log</div>
       </div>
 
       <div class="tbody">
@@ -14,14 +14,48 @@
           <div class="td">{{ issue.id }}</div>
           <div class="td">{{ issue.text }}</div>
           <div class="td">{{ formatTime(issue.time) }}</div>
-          <div class="td">noop</div>
-          <div class="td">noop</div>
+          <div class="td">
+            <select
+              v-model="issue.activity"
+              class="select-activity"
+              @change="changeActivity($event, issue.id)"
+            >
+              <option
+                v-for="activity in activities"
+                :key="activity.id"
+                :selected="activity.id === issue.activity"
+                :value="activity.id"
+              >
+                {{ activity.name }}
+              </option>
+            </select>
+          </div>
+          <div class="td">
+            <input
+              type="text"
+              maxlength="1"
+              class="time-log"
+              :class="{ error: issue.error }"
+              :value="issue.timeLog || ''"
+              @input="changeTimeLog($event, issue.id)"
+            >
+          </div>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      <button class="button button-validate">Apply in Redmine</button>
+      <div class="total">
+        Total: <span :class="{
+          valid: issuesTimeLogTotal > 0 && issuesTimeLogTotal < 9,
+          error: issuesTimeLogTotal > 8,
+        }">{{ issuesTimeLogTotal }} hours</span>
+      </div>
+      <button class="button button-validate button-push" @click="pushActivities">
+        {{ status === 'idle' ? 'Apply to Redmine' : '' }}
+        {{ status === 'pushing' ? 'Applying...' : '' }}
+        {{ status === 'pushed' ? 'Applied!' : '' }}
+      </button>
       <button class="button button-cancel" @click="clear">Clear</button>
       <button class="button button-cancel" @click="$emit('close')">Close</button>
     </div>
@@ -31,13 +65,19 @@
 <script>
 /* eslint-disable import/no-extraneous-dependencies */
 import store from '@/services/store';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'activity',
   store,
+  mounted() {
+    this.$store.dispatch('Redmine/pullActivities');
+  },
   computed: {
+    ...mapState('Redmine', ['activities', 'status']),
+    ...mapGetters('Redmine', ['issuesTimeLogTotal']),
     issues() {
-      const { issues } = this.$store.state.Redmine.issuesData;
+      const issues = { ...this.$store.state.Redmine.issuesData.issues };
       const activeIssue = { ...this.$store.state.Redmine.activeIssue };
 
       if (!activeIssue.id) {
@@ -49,7 +89,11 @@ export default {
 
       activeIssue.time = time + ((new Date()).getTime() - activeIssue.start);
 
-      issues[activeIssue.id] = { ...issue, ...activeIssue };
+      issues[activeIssue.id] = {
+        ...issue,
+        ...activeIssue,
+        error: issue.error,
+      };
 
       return issues;
     },
@@ -77,6 +121,28 @@ export default {
     },
     formatNowTime(start) {
       return this.formatTime((new Date()).getTime() - start);
+    },
+    changeActivity(event, issueId) {
+      this.$store.dispatch('Redmine/changeIssueActivity', {
+        issueId,
+        activityId: event.target.value,
+      });
+    },
+    changeTimeLog(event, issueId) {
+      this.$store.dispatch('Redmine/changeIssueTimeLog', {
+        issueId,
+        timeLog: event.target.value,
+      });
+    },
+    pushActivities(event, issueId) {
+      if (this.status !== 'idle') {
+        return;
+      }
+
+      this.$store.dispatch('Redmine/pushIssuesActivities', {
+        issueId,
+        activityId: event.target.value,
+      });
     },
   },
 };
@@ -154,13 +220,37 @@ export default {
         }
 
         &:nth-child(4) {
-          width: 20%;
+          width: 18%;
         }
 
         &:nth-child(5) {
-          width: 15%;
+          width: 17%;
         }
       }
+    }
+  }
+
+  .select-activity {
+    border: none;
+    width: 90%;
+    padding: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+  }
+
+  .time-log {
+    border: none;
+    width: 90%;
+    padding: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    text-align: center;
+
+    &.error {
+      background: #86211a;
+      color: #fff;
     }
   }
 
@@ -170,10 +260,26 @@ export default {
     left: 2px;
     right: 2px;
     text-align: right;
+
+    .total {
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+
+      .valid {
+        color: #5ddc6c;
+      }
+
+      .error {
+        color: #faa176;
+      }
+    }
   }
 
   .button {
     cursor: pointer;
+    outline: none;
     background: none;
     border: none;
     color: #fff;
@@ -193,6 +299,21 @@ export default {
   .button-cancel {
     background: #1d1a1a;
     color: #aaa;
+  }
+
+  &.pushing {
+    .button-push {
+      cursor: default;
+      background: #aaa;
+      color: #333;
+    }
+  }
+
+  &.pushed {
+    .button-push {
+      cursor: default;
+      background: #5ddc6c;
+    }
   }
 }
 </style>

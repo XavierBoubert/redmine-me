@@ -248,6 +248,7 @@ html, body {
     left: 5px;
     right: 5px;
     bottom: 8px;
+    overflow: hidden;
   }
 }
 </style>
