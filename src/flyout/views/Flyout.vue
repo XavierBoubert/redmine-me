@@ -4,8 +4,8 @@
       <span class="issue-help">I'm working on</span>
 
       <input
-        ref="issueId"
         class="issue-id"
+        :class="{ empty: !activeIssue.id }"
         type="text"
         :value="activeIssue.id"
         @input="changeIssueId"
@@ -17,22 +17,23 @@
 
       <div class="error-text">{{ error }}</div>
 
-      <i
+      <button
+        ref="buttonSheet"
         class="sheet far fa-clock"
         :class="{ active: panels.activity }"
         @click="togglePanel('activity')"
-      ></i>
-      <i
+      ></button>
+      <button
         class="options fas fa-cog"
         :class="{ active: panels.options }"
         @click="togglePanel('options')"
-      ></i>
+      ></button>
 
       <div class="logo"></div>
     </div>
 
     <div class="panel">
-      <activity v-if="panels.activity" />
+      <activity v-if="panels.activity" @close="togglePanel('activity')" />
     </div>
   </div>
 </template>
@@ -40,21 +41,16 @@
 <script>
 /* eslint-disable import/no-extraneous-dependencies */
 import { ipcRenderer } from 'electron';
-// import Electron from 'electron';
 import { mapState } from 'vuex';
 import store from '@/services/store';
 import Activity from '@/activity/views/Activity.vue';
-
-// const { ipcRenderer } = window.require('electron');
-
-// const {remote} = window.require("electron");
 
 export default {
   name: 'flyout',
   store,
   components: { Activity },
   mounted() {
-    this.$refs.issueId.blur();
+    setTimeout(() => this.$refs.buttonSheet.focus());
 
     if (this.activeIssue.id) {
       this.changeIssueId({ target: { value: this.activeIssue.id } });
@@ -91,9 +87,6 @@ export default {
       this.inputTimeout = setTimeout(() => {
         this.$store.dispatch('Redmine/pullActiveIssue', event.target.value);
       }, 500);
-    },
-    clear() {
-      this.$store.dispatch('Redmine/clear');
     },
   },
 };
@@ -155,10 +148,12 @@ html, body {
 
     .issue-id {
       cursor: pointer;
+      box-sizing: border-box;
       position: absolute;
       left: 2px;
       bottom: 2px;
       border: 0;
+      border-bottom: 1px solid transparent;
       background: none;
       width: 53px;
       padding: 0;
@@ -166,14 +161,18 @@ html, body {
       &:focus {
         cursor: text;
       }
+
+      &.empty {
+        border-bottom: 1px solid #aaa;
+      }
     }
 
     .issue-text {
       cursor: pointer;
       user-select: none;
       position: absolute;
-      left: 50px;
-      bottom: 2px;
+      left: 60px;
+      bottom: 3px;
       right: 5px;
       height: 15px;
       color: #fff;
@@ -216,6 +215,11 @@ html, body {
       right: 25px;
       opacity: 0.1;
       transition: all 0.25s $easeOutQuart;
+      border: none;
+      outline: none;
+      padding: 0;
+      background: none;
+      color: #aaa;
 
       &:hover {
         color: #ef615b;

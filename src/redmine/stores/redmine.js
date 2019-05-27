@@ -25,6 +25,9 @@ const loadIssuesData = () => {
   return issuesData.date === dateString() ? issuesData : issuesDataFormat();
 };
 
+const saveIssuesData = issuesData => localStorage
+  .setItem('issues', JSON.stringify(issuesData || {}));
+
 const loadActiveIssue = () => {
   let activeIssue = localStorage.getItem('activeIssue');
   activeIssue = (activeIssue && JSON.parse(activeIssue)) || activeIssueFormat();
@@ -83,6 +86,9 @@ const store = {
     clear: (state) => {
       Vue.set(state, 'issuesData', issuesDataFormat());
       Vue.set(state, 'activeIssue', activeIssueFormat());
+
+      saveIssuesData(state.issuesData);
+      saveActiveIssue(state.activeIssue);
     },
   },
   actions: {
@@ -97,7 +103,7 @@ const store = {
         } catch (err) {
           issue.error = err.toString();
         }
-      } else {
+      } else if (id) {
         issue.error = 'Not a number';
       }
 
