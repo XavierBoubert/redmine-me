@@ -1,45 +1,99 @@
 <template>
-  <div class="flyout" :class="{ error }">
-    <span class="issue-help">I'm working on</span>
+  <div class="flyout">
+    <div class="issue" :class="{ error }">
+      <span class="issue-help">I'm working on</span>
 
-    <input ref="issueId" class="issue-id" type="text" v-model="issueId" @blur="refreshIssue">
-    <div
-      class="issue-text"
-      :class="{ empty: activeIssue.error || !activeIssue.text, error: activeIssue.error }"
-    >{{ activeIssue.error || activeIssue.text }}</div>
+      <input
+        ref="issueId"
+        class="issue-id"
+        type="text"
+        :value="activeIssue.id"
+        @input="changeIssueId"
+      >
+      <div
+        class="issue-text"
+        :class="{ empty: activeIssue.error || !activeIssue.text, error: activeIssue.error }"
+      >{{ activeIssue.error || activeIssue.text }}</div>
 
-    <div class="error-text">{{ error }}</div>
+      <div class="error-text">{{ error }}</div>
 
-    <i class="sheet far fa-clock"></i>
-    <i class="options fas fa-cog"></i>
+      <i
+        class="sheet far fa-clock"
+        :class="{ active: panels.activity }"
+        @click="togglePanel('activity')"
+      ></i>
+      <i
+        class="options fas fa-cog"
+        :class="{ active: panels.options }"
+        @click="togglePanel('options')"
+      ></i>
 
-    <div class="logo"></div>
+      <div class="logo"></div>
+    </div>
+
+    <div class="panel">
+      <activity v-if="panels.activity" />
+    </div>
   </div>
 </template>
 
 <script>
 /* eslint-disable import/no-extraneous-dependencies */
+import { ipcRenderer } from 'electron';
+// import Electron from 'electron';
 import { mapState } from 'vuex';
 import store from '@/services/store';
+import Activity from '@/activity/views/Activity.vue';
+
+// const { ipcRenderer } = window.require('electron');
+
+// const {remote} = window.require("electron");
 
 export default {
   name: 'flyout',
   store,
+  components: { Activity },
   mounted() {
     this.$refs.issueId.blur();
+
+    if (this.activeIssue.id) {
+      this.changeIssueId({ target: { value: this.activeIssue.id } });
+    }
   },
   data() {
     return {
       error: null,
-      issueId: null,
+      inputTimeout: null,
+      panels: {
+        activity: false,
+        options: false,
+      },
     };
   },
   computed: {
     ...mapState('Redmine', ['activeIssue']),
   },
   methods: {
-    refreshIssue() {
-      this.$store.dispatch('Redmine/pullActiveIssue', this.issueId);
+    togglePanel(name) {
+      this.panels[name] = !this.panels[name];
+
+      ipcRenderer.send('panel:opened', { name, opened: this.panels[name] });
+
+      Object.keys(this.panels).forEach((panelName) => {
+        this.panels[panelName] = panelName === name
+          ? this.panels[panelName]
+          : false;
+      });
+    },
+    changeIssueId(event) {
+      clearTimeout(this.inputTimeout);
+
+      this.inputTimeout = setTimeout(() => {
+        this.$store.dispatch('Redmine/pullActiveIssue', event.target.value);
+      }, 500);
+    },
+    clear() {
+      this.$store.dispatch('Redmine/clear');
     },
   },
 };
@@ -62,125 +116,134 @@ html, body {
 @import '../assets/mixins';
 
 .flyout {
-  box-sizing: border-box;
-  position: absolute;
-  top: 2px;
-  left: 14px;
-  width: (250px - 20px);
-  height: 40px;
-  padding: 0 2px;
-  font-size: 11px;
-  color: #aaa;
-  background: radial-gradient(ellipse at center, #3f3f3f 0%,#323232 100%);
-  border: 2px solid #414141;
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  transition: all 0.25s $easeOutQuart;
-
-  &:hover {
+  .issue {
+    box-sizing: border-box;
+    position: absolute;
     top: 0;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-  }
-
-  .logo {
-    -webkit-app-region: drag;
-    z-index: 1;
-    user-select: none;
-    cursor: grab;
-    position: absolute;
-    top: 50%;
-    right: -15px;
-    bottom: 0;
-    width: 40px;
+    left: 5px;
+    width: (250px - 20px);
     height: 40px;
-    transform: translateY(-50%);
-    background: url("../assets/logo.png") no-repeat;
-    background-size: 93%;
-    background-position: center;
-  }
+    padding: 0 2px;
+    font-size: 11px;
+    color: #aaa;
+    background: radial-gradient(ellipse at center, #3f3f3f 0%,#323232 100%);
+    border: 2px solid #414141;
+    border-radius: 3px;
+    box-shadow: 0 2px 3px 2px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 
-  .issue-help {
-    cursor: default;
-    user-select: none;
-  }
-
-  .issue-id {
-    cursor: pointer;
-    position: absolute;
-    left: 2px;
-    bottom: 2px;
-    border: 0;
-    background: none;
-    width: 53px;
-    padding: 0;
-
-    &:focus {
-      cursor: text;
+    .logo {
+      -webkit-app-region: drag;
+      z-index: 1;
+      user-select: none;
+      cursor: grab;
+      position: absolute;
+      top: 50%;
+      right: -15px;
+      bottom: 0;
+      width: 40px;
+      height: 40px;
+      transform: translateY(-50%);
+      background: url("../assets/logo.png") no-repeat;
+      background-size: 93%;
+      background-position: center;
     }
-  }
 
-  .issue-text {
-    cursor: pointer;
-    user-select: none;
-    position: absolute;
-    left: 50px;
-    bottom: 2px;
-    right: 5px;
-    height: 15px;
-    color: #fff;
-    word-break: break-all;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-
-    &.empty {
+    .issue-help {
       cursor: default;
+      user-select: none;
     }
 
-    &.error {
-      color: #faa176;
+    .issue-id {
+      cursor: pointer;
+      position: absolute;
+      left: 2px;
+      bottom: 2px;
+      border: 0;
+      background: none;
+      width: 53px;
+      padding: 0;
+
+      &:focus {
+        cursor: text;
+      }
     }
-  }
 
-  .error-text {
-    position: absolute;
-    top: 10px;
-    left: 2px;
-    width: 200px;
-    color: #faa176;
-  }
+    .issue-text {
+      cursor: pointer;
+      user-select: none;
+      position: absolute;
+      left: 50px;
+      bottom: 2px;
+      right: 5px;
+      height: 15px;
+      color: #fff;
+      word-break: break-all;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
 
-  &.error {
-    .issue-help, .issue-id, .issue-text {
-      display: none;
+      &.empty {
+        cursor: default;
+      }
+
+      &.error {
+        color: #faa176;
+      }
     }
 
     .error-text {
-      display: block;
+      position: absolute;
+      top: 10px;
+      left: 2px;
+      width: 200px;
+      color: #faa176;
     }
-  }
 
-  .sheet, .options {
-    cursor: pointer;
-    position: absolute;
-    top: 3px;
-    right: 25px;
-    opacity: 0.1;
-    transition: all 0.25s $easeOutQuart;
+    &.error {
+      .issue-help, .issue-id, .issue-text {
+        display: none;
+      }
+
+      .error-text {
+        display: block;
+      }
+    }
+
+    .sheet, .options {
+      cursor: pointer;
+      position: absolute;
+      top: 3px;
+      right: 25px;
+      opacity: 0.1;
+      transition: all 0.25s $easeOutQuart;
+
+      &:hover {
+        color: #ef615b;
+      }
+
+      &.active {
+        color: #ef615b;
+        opacity: 1;
+      }
+    }
+
+    .sheet {
+      right: 45px;
+    }
 
     &:hover {
-      color: #ef615b;
+      .sheet, .options {
+        opacity: 1;
+      }
     }
   }
 
-  .sheet {
-    right: 45px;
-  }
-
-  &.flyout:hover {
-    .sheet, .options {
-      opacity: 1;
-    }
+  .panel {
+    position: absolute;
+    top: 42px + 10px;
+    left: 5px;
+    right: 5px;
+    bottom: 8px;
   }
 }
 </style>

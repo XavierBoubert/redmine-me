@@ -4,5 +4,6 @@ module.exports = {
     resolve: {
       symlinks: false,
     },
+    target: 'electron-renderer',
   },
 };
