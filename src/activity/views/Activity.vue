@@ -47,8 +47,8 @@
     <div class="footer">
       <div class="total">
         Total: <span :class="{
-          valid: timeLogTotal > 0 && timeLogTotal < 9,
-          error: timeLogTotal > 8,
+          valid: timeLogTotal > 0 && timeLogTotal <= (maxHours || 8),
+          error: timeLogTotal > (maxHours || 8),
         }">{{ timeLogTotal }} hours</span>
       </div>
       <button class="button button-validate button-push" @click="pushActivities">
@@ -84,17 +84,23 @@ export default {
   },
   computed: {
     ...mapState('Redmine', ['activities', 'status']),
+    ...mapState('Options', ['defaultActivity', 'maxHours']),
     issues() {
       const issues = { ...this.$store.state.Redmine.issuesData.issues };
       const activeIssue = { ...this.$store.state.Redmine.activeIssue };
+
+      Object.keys(issues).forEach((id) => {
+        issues[id].activity = issues[id].activity || this.defaultActivity;
+      });
 
       if (!activeIssue.id) {
         return issues;
       }
 
       const issue = issues[activeIssue.id] || {};
-      const time = issues[activeIssue.id] ? issues[activeIssue.id].time : 0;
+      const time = issue.time || 0;
 
+      activeIssue.activity = activeIssue.activity || this.defaultActivity;
       activeIssue.time = time + ((new Date()).getTime() - activeIssue.start);
 
       issues[activeIssue.id] = {
@@ -158,14 +164,13 @@ export default {
 
       this.refreshIssuesTimeLogTotal();
     },
-    pushActivities(event, issueId) {
+    pushActivities() {
       if (this.status !== 'idle') {
         return;
       }
 
       this.$store.dispatch('Redmine/pushIssuesActivities', {
-        issueId,
-        activityId: event.target.value,
+        defaultActivity: this.defaultActivity,
       });
     },
     openIssue(issueId) {

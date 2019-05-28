@@ -144,6 +144,10 @@ const store = {
       const issue = state.issuesData.issues[issueId];
 
       if (!issue) {
+        if (state.activeIssue.id === issueId) {
+          Vue.set(state.activeIssue, 'timeLog', timeLog);
+        }
+
         return;
       }
 
@@ -213,15 +217,33 @@ const store = {
     changeIssueTimeLog({ commit }, { issueId, timeLog }) {
       commit('changeIssueTimeLog', { issueId, timeLog });
     },
-    async pushIssuesActivities({ state, commit }) {
+    async pushIssuesActivities({ state, commit }, { defaultActivity }) {
+      const issues = { ...state.issuesData.issues };
+      const activeIssue = { ...state.activeIssue };
+
+      Object.keys(issues).forEach((id) => {
+        issues[id].activity = issues[id].activity || this.defaultActivity;
+      });
+
+      if (activeIssue.id) {
+        const issue = issues[activeIssue.id] || {};
+        const time = issue.time || 0;
+        activeIssue.time = time + ((new Date()).getTime() - activeIssue.start);
+        issues[activeIssue.id] = { ...issue, ...activeIssue };
+      }
+
+      const issuesToPush = Object
+        .keys(issues)
+        .map(id => ({ ...issues[id], activity: issues[id].activity || defaultActivity }))
+        .filter(issue => issue.id && isTimeLogValid(issue.timeLog));
+
+      if (!issuesToPush.length) {
+        return;
+      }
+
       commit('changeStatus', 'pushing');
 
-      const issues = Object
-        .keys(state.issuesData.issues)
-        .map(id => state.issuesData.issues[id])
-        .filter(issue => issue.id && isTimeLogValid(issue.timeLog) && issue.activity);
-
-      await pushIssuesActivity(issues);
+      await pushIssuesActivity(issuesToPush);
 
       commit('clearTimeLogs');
 
@@ -231,10 +253,12 @@ const store = {
         commit('changeStatus', 'idle');
       }, 3000);
     },
-    changeApi({ dispatch }, { url, username, password }) {
+    async changeApi({ dispatch }, { url, username, password }) {
       api.changeAccess(url, username, password);
 
-      dispatch('test');
+      await dispatch('test');
+
+      dispatch('pullActivities');
     },
     async test({ commit }) {
       const test = await api.test();

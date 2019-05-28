@@ -30,7 +30,8 @@
         @click="togglePanel('options')"
       ></button>
 
-      <div class="logo"></div>
+      <div v-if="!avatar" class="logo"></div>
+      <img v-if="avatar" :src="avatar" class="logo-avatar">
     </div>
 
     <div class="panel">
@@ -73,6 +74,7 @@ export default {
   },
   computed: {
     ...mapState('Redmine', ['error', 'activeIssue']),
+    ...mapState('Options', ['avatar']),
   },
   methods: {
     togglePanel(name) {
@@ -138,7 +140,7 @@ html, body {
     border-radius: 3px;
     box-shadow: 0 2px 3px 2px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 
-    .logo {
+    .logo, .logo-avatar {
       -webkit-app-region: drag;
       z-index: 1;
       user-select: none;
@@ -150,9 +152,17 @@ html, body {
       width: 40px;
       height: 40px;
       transform: translateY(-50%);
+    }
+
+    .logo {
       background: url("../assets/logo.png") no-repeat;
       background-size: 93%;
       background-position: center;
+    }
+
+    .logo-avatar {
+      border-radius: 50%;
+      overflow: hidden;
     }
 
     .issue-help {

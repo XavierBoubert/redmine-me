@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import Vue from 'vue';
+import md5 from 'md5';
 import api from '@/redmine/api';
 
 const name = 'Options';
@@ -10,9 +11,10 @@ const store = {
     redmineUrl: api.url,
     redmineUsername: api.username,
     redminePassword: api.password,
-    defaultActivity: localStorage.get('default-activity') || null,
-    maxHours: localStorage.get('max-hours') || null,
-    email: localStorage.get('email') || null,
+    defaultActivity: localStorage.getItem('default-activity') || null,
+    maxHours: localStorage.getItem('max-hours') || null,
+    email: localStorage.getItem('email') || null,
+    avatar: localStorage.getItem('avatar') || null,
   },
   mutations: {
     changeRedmine: (state, { url, username, password }) => {
@@ -21,19 +23,23 @@ const store = {
       Vue.set(state, 'redminePassword', password);
     },
     changeDefaultActivity: (state, defaultActivity) => {
-      localStorage.set('default-activity', defaultActivity);
+      localStorage.setItem('default-activity', defaultActivity);
 
       Vue.set(state, 'defaultActivity', defaultActivity);
     },
     changeMaxHours: (state, maxHours) => {
-      localStorage.set('max-hours', maxHours);
+      localStorage.setItem('max-hours', maxHours);
 
       Vue.set(state, 'maxHours', maxHours);
     },
     changeEmail: (state, email) => {
-      localStorage.set('email', email);
+      const avatar = email ? `https://www.gravatar.com/avatar/${md5(email)}?s=200` : null;
+
+      localStorage.setItem('email', email);
+      localStorage.setItem('avatar', avatar);
 
       Vue.set(state, 'email', email);
+      Vue.set(state, 'avatar', avatar);
     },
   },
   actions: {

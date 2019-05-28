@@ -16,15 +16,24 @@
     <h2>Activity</h2>
 
     <label>Default activity</label>
-    <select><option selected>Ok</option></select>
+    <select v-model="defaultActivity" @change="defaultActivityChange">
+      <option
+        v-for="activity in activities"
+        :key="activity.id"
+        :selected="activity.id === defaultActivity"
+        :value="activity.id"
+      >
+        {{ activity.name }}
+      </option>
+    </select>
 
     <label>Max hours per day</label>
-    <input type="text">
+    <input type="text" @input="maxHoursChange" :value="maxHours">
 
     <h2>Customization</h2>
 
     <label>Your email (to display your gravatar)</label>
-    <input type="text">
+    <input type="text" @input="emailChange" :value="email">
   </div>
 </template>
 
@@ -36,9 +45,14 @@ import { mapState } from 'vuex';
 export default {
   name: 'options',
   store,
+  mounted() {
+    this.$store.dispatch('Redmine/pullActivities');
+  },
   computed: {
-    ...mapState('Options', ['redmineUrl', 'redmineUsername', 'redminePassword']),
-    ...mapState('Redmine', ['network']),
+    ...mapState('Options', [
+      'redmineUrl', 'redmineUsername', 'redminePassword', 'defaultActivity', 'maxHours', 'email',
+    ]),
+    ...mapState('Redmine', ['network', 'activities']),
   },
   methods: {
     redmineChange() {
@@ -47,6 +61,15 @@ export default {
         username: this.$refs.redmineUsername.value,
         password: this.$refs.redminePassword.value,
       });
+    },
+    defaultActivityChange(event) {
+      this.$store.dispatch('Options/changeDefaultActivity', event.target.value);
+    },
+    maxHoursChange(event) {
+      this.$store.dispatch('Options/changeMaxHours', event.target.value);
+    },
+    emailChange(event) {
+      this.$store.dispatch('Options/changeEmail', event.target.value);
     },
   },
 };
