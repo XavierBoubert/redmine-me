@@ -16,12 +16,12 @@ const isTimeLogValid = timeLog => parseInt(timeLog, 10) == timeLog
 
 const issuesDataFormat = (issues = {}) => ({ date: dateString(), issues });
 const issueFormat = (id, text, time) => ({ id, text, time });
-const activeIssueFormat = (id = null, text = null, error = null) => ({
+const activeIssueFormat = (id = null, text = null, start = null, error = null) => ({
   date: dateString(),
   id,
   text,
   error,
-  start: dateTime(),
+  start: start || dateTime(),
 });
 
 const loadIssuesData = () => {
@@ -42,7 +42,7 @@ const loadActiveIssue = () => {
 };
 const saveActiveIssue = issue => localStorage.setItem(
   'activeIssue',
-  issue && issue.id && !issue.error ? JSON.stringify({ ...issue, date: dateString() }) : '',
+  issue && issue.id && !issue.error ? JSON.stringify(issue) : '',
 );
 
 const stackActiveIssue = (issuesData, issue) => {
@@ -68,19 +68,13 @@ const pushIssuesActivity = async (issues) => {
 
   const issue = issues.pop();
 
-  console.log({
-    'time_entry[issue_id]': issue.id,
-    'time_entry[hours]': issue.timeLog,
-    'time_entry[activity_id]': issue.activity,
-  });
-
   const formData = new FormData();
   formData.set('time_entry[issue_id]', issue.id);
   formData.set('time_entry[hours]', issue.timeLog);
   formData.set('time_entry[activity_id]', issue.activity);
 
   try {
-    await api.post('time_entries.json', formData, {
+    await api.redmine.post('time_entries.json', formData, {
       config: { headers: { 'Content-Type': 'multipart/form-data' } },
     });
   } catch (err) {
@@ -94,21 +88,12 @@ const pushIssuesActivity = async (issues) => {
 const store = {
   namespaced: true,
   state: {
+    error: null,
+    network: false,
     status: 'idle',
     issuesData: loadIssuesData(),
     activeIssue: loadActiveIssue(),
     activities: [],
-  },
-  getters: {
-    issuesTimeLogTotal: state => (state.issuesData.issues.length
-      ? Object
-        .keys(state.issuesData.issues)
-        .map(id => parseInt((state.issuesData.issues[id]
-          && isTimeLogValid(state.issuesData.issues[id].timeLog)
-          && state.issuesData.issues[id].timeLog)
-          || 0, 10))
-        .reduce((accumulator, currentValue) => accumulator + currentValue)
-      : 0),
   },
   mutations: {
     changeStatus: (state, value) => {
@@ -119,14 +104,25 @@ const store = {
         state.activeIssue.id
         && !state.activeIssue.error
         && issue.id
-        && state.activeIssue.id !== issue.id
       ) {
-        Vue.set(state, 'issuesData', stackActiveIssue(state.issuesData, state.activeIssue));
+        if (state.activeIssue.id === issue.id) {
+          // eslint-disable-next-line no-param-reassign
+          issue.start = state.activeIssue.start;
+        } else {
+          Vue.set(state, 'issuesData', stackActiveIssue(state.issuesData, state.activeIssue));
+        }
       }
+
+      // eslint-disable-next-line no-param-reassign
+      issue.start = issue.start || dateTime();
+      // eslint-disable-next-line no-param-reassign
+      issue.date = issue.date || dateString();
 
       saveActiveIssue(issue);
 
-      Vue.set(state, 'activeIssue', activeIssueFormat(issue.id, issue.text, issue.error));
+      Vue.set(state, 'activeIssue', activeIssueFormat(
+        issue.id, issue.text, issue.start, issue.error,
+      ));
     },
     changeActivities: (state, activities) => {
       Vue.set(state, 'activities', activities);
@@ -152,7 +148,7 @@ const store = {
       }
 
       issue.timeLog = timeLog;
-      issue.error = timeLog !== '' && !isTimeLogValid(timeLog);
+      issue.error = !(timeLog === '' || isTimeLogValid(timeLog));
 
       Vue.set(state.issuesData.issues, issueId, issue);
 
@@ -169,6 +165,10 @@ const store = {
 
       Vue.set(state.issuesData, 'issues', issues);
     },
+    changeNetwork: (state, error) => {
+      Vue.set(state, 'network', !error);
+      Vue.set(state, 'error', error);
+    },
     clear: (state) => {
       Vue.set(state, 'issuesData', issuesDataFormat());
       Vue.set(state, 'activeIssue', activeIssueFormat());
@@ -183,7 +183,7 @@ const store = {
 
       if (id && isNumber(id)) {
         try {
-          const { data } = await api.get(`issues/${id}.json`);
+          const { data } = await api.redmine.get(`issues/${id}.json`);
           issue.text = data.issue.subject;
         } catch (err) {
           issue.error = err.toString();
@@ -198,7 +198,7 @@ const store = {
       let activities = [];
 
       try {
-        const { data } = await api.get('/enumerations/time_entry_activities.json');
+        const { data } = await api.redmine.get('/enumerations/time_entry_activities.json');
         activities = data.time_entry_activities;
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -230,6 +230,16 @@ const store = {
       setTimeout(() => {
         commit('changeStatus', 'idle');
       }, 3000);
+    },
+    changeApi({ dispatch }, { url, username, password }) {
+      api.changeAccess(url, username, password);
+
+      dispatch('test');
+    },
+    async test({ commit }) {
+      const test = await api.test();
+
+      commit('changeNetwork', !test ? 'Please set your Redmine options' : false);
     },
     clear({ commit }) {
       commit('clear');

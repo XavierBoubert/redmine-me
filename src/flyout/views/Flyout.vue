@@ -13,9 +13,10 @@
       <div
         class="issue-text"
         :class="{ empty: activeIssue.error || !activeIssue.text, error: activeIssue.error }"
+        @click="openActiveIssue"
       >{{ activeIssue.error || activeIssue.text }}</div>
 
-      <div class="error-text">{{ error }}</div>
+      <div class="error-text" v-if="error">{{ error }}</div>
 
       <button
         ref="buttonSheet"
@@ -34,6 +35,7 @@
 
     <div class="panel">
       <activity v-if="panels.activity" @close="togglePanel('activity')" />
+      <options v-if="panels.options" @close="togglePanel('options')" />
     </div>
   </div>
 </template>
@@ -42,23 +44,26 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { ipcRenderer } from 'electron';
 import { mapState } from 'vuex';
+import api from '@/redmine/api';
 import store from '@/services/store';
 import Activity from '@/activity/views/Activity.vue';
+import Options from '@/options/views/Options.vue';
 
 export default {
   name: 'flyout',
   store,
-  components: { Activity },
+  components: { Activity, Options },
   mounted() {
     setTimeout(() => this.$refs.buttonSheet.focus());
 
     if (this.activeIssue.id) {
       this.changeIssueId({ target: { value: this.activeIssue.id } });
     }
+
+    this.$store.dispatch('Redmine/test');
   },
   data() {
     return {
-      error: null,
       inputTimeout: null,
       panels: {
         activity: false,
@@ -67,7 +72,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('Redmine', ['activeIssue']),
+    ...mapState('Redmine', ['error', 'activeIssue']),
   },
   methods: {
     togglePanel(name) {
@@ -87,6 +92,15 @@ export default {
       this.inputTimeout = setTimeout(() => {
         this.$store.dispatch('Redmine/pullActiveIssue', event.target.value);
       }, 500);
+    },
+    openActiveIssue() {
+      if (!this.activeIssue.id || this.activeIssue.error) {
+        return;
+      }
+
+      ipcRenderer.send('browser:open', {
+        url: `${api.url}/issues/${this.activeIssue.id}`,
+      });
     },
   },
 };
@@ -181,18 +195,22 @@ html, body {
       text-overflow: ellipsis;
       overflow: hidden;
 
+      &:hover {
+        color: #f4854e;
+      }
+
       &.empty {
         cursor: default;
       }
 
-      &.error {
+      &.error, &.error:hover {
         color: #faa176;
       }
     }
 
     .error-text {
       position: absolute;
-      top: 10px;
+      top: 20px;
       left: 2px;
       width: 200px;
       color: #faa176;
@@ -248,7 +266,6 @@ html, body {
     left: 5px;
     right: 5px;
     bottom: 8px;
-    overflow: hidden;
   }
 }
 </style>

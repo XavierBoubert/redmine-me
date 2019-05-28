@@ -2,7 +2,7 @@
 const path = require('path');
 const electron = require('electron');
 
-const { BrowserWindow, ipcMain } = electron;
+const { BrowserWindow, ipcMain, shell } = electron;
 
 const WIN_URL = process.env.LOCAL === 'true'
   ? 'http://localhost:9005/'
@@ -10,7 +10,7 @@ const WIN_URL = process.env.LOCAL === 'true'
 const PANELS = {
   none: { width: (250 + 5), height: 74 },
   activity: { width: 580, height: 350 },
-  options: { width: 580, height: 350 },
+  options: { width: 380, height: 580 },
 };
 
 class FlyoutWin {
@@ -21,6 +21,8 @@ class FlyoutWin {
       this.win.setMinimumSize(panel.width, panel.height);
       this.win.setSize(panel.width, panel.height);
     });
+
+    ipcMain.on('browser:open', (event, { url }) => shell.openExternal(url));
   }
 
   async open() {

@@ -11,8 +11,8 @@
 
       <div class="tbody">
         <div v-for="issue in issues" :key="issue.id" class="tr">
-          <div class="td">{{ issue.id }}</div>
-          <div class="td">{{ issue.text }}</div>
+          <div class="td" @click="openIssue(issue.id)">{{ issue.id }}</div>
+          <div class="td" @click="openIssue(issue.id)">{{ issue.text }}</div>
           <div class="td">{{ formatTime(issue.time) }}</div>
           <div class="td">
             <select
@@ -47,9 +47,9 @@
     <div class="footer">
       <div class="total">
         Total: <span :class="{
-          valid: issuesTimeLogTotal > 0 && issuesTimeLogTotal < 9,
-          error: issuesTimeLogTotal > 8,
-        }">{{ issuesTimeLogTotal }} hours</span>
+          valid: timeLogTotal > 0 && timeLogTotal < 9,
+          error: timeLogTotal > 8,
+        }">{{ timeLogTotal }} hours</span>
       </div>
       <button class="button button-validate button-push" @click="pushActivities">
         {{ status === 'idle' ? 'Apply to Redmine' : '' }}
@@ -64,18 +64,26 @@
 
 <script>
 /* eslint-disable import/no-extraneous-dependencies */
+import { ipcRenderer } from 'electron';
+import api from '@/redmine/api';
 import store from '@/services/store';
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
   name: 'activity',
   store,
   mounted() {
     this.$store.dispatch('Redmine/pullActivities');
+
+    this.refreshIssuesTimeLogTotal();
+  },
+  data() {
+    return {
+      timeLogTotal: 0,
+    };
   },
   computed: {
     ...mapState('Redmine', ['activities', 'status']),
-    ...mapGetters('Redmine', ['issuesTimeLogTotal']),
     issues() {
       const issues = { ...this.$store.state.Redmine.issuesData.issues };
       const activeIssue = { ...this.$store.state.Redmine.activeIssue };
@@ -102,14 +110,28 @@ export default {
     clear() {
       this.$store.dispatch('Redmine/clear');
     },
-    formatDoubleNumber(value) {
-      return value && value < 10 ? `0${value}` : value;
+    isTimeLogValid(timeLog) {
+      // eslint-disable-next-line eqeqeq
+      return parseInt(timeLog, 10) == timeLog
+        && parseInt(timeLog, 10) > -1
+        && parseInt(timeLog, 10) < 9;
+    },
+    refreshIssuesTimeLogTotal() {
+      this.timeLogTotal = Object.keys(this.issues).length
+        ? Object
+          .keys(this.issues)
+          .map(id => parseInt((this.issues[id]
+            && this.isTimeLogValid(this.issues[id].timeLog)
+            && this.issues[id].timeLog)
+            || 0, 10))
+          .reduce((accumulator, currentValue) => accumulator + currentValue)
+        : 0;
     },
     formatTime(milli) {
       const time = Math.round(milli / 1000);
-      const hours = this.formatDoubleNumber(Math.floor(time / 3600));
-      const minutes = this.formatDoubleNumber(Math.floor((time - (hours * 3600)) / 60));
-      const seconds = this.formatDoubleNumber(time - (hours * 3600) - (minutes * 60));
+      const hours = Math.floor(time / 3600);
+      const minutes = Math.floor((time - (hours * 3600)) / 60);
+      const seconds = time - (hours * 3600) - (minutes * 60);
 
       return [
         hours ? `${hours}h` : '',
@@ -133,6 +155,8 @@ export default {
         issueId,
         timeLog: event.target.value,
       });
+
+      this.refreshIssuesTimeLogTotal();
     },
     pushActivities(event, issueId) {
       if (this.status !== 'idle') {
@@ -142,6 +166,15 @@ export default {
       this.$store.dispatch('Redmine/pushIssuesActivities', {
         issueId,
         activityId: event.target.value,
+      });
+    },
+    openIssue(issueId) {
+      if (!issueId) {
+        return;
+      }
+
+      ipcRenderer.send('browser:open', {
+        url: `${api.url}/issues/${issueId}`,
       });
     },
   },
@@ -225,6 +258,16 @@ export default {
 
         &:nth-child(5) {
           width: 17%;
+        }
+      }
+
+      .td {
+        &:first-child, &:nth-child(2) {
+          cursor: pointer;
+
+          &:hover {
+            color: #f4854e;
+          }
         }
       }
     }
