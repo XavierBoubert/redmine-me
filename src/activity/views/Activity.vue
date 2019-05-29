@@ -330,7 +330,6 @@ export default {
     outline: none;
     background: none;
     border: none;
-    color: #fff;
     border-radius: 3px;
     margin: 0 0 0 10px;
     color: #424242;

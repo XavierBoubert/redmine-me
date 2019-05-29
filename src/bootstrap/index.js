@@ -2,6 +2,15 @@
 require('dotenv').config();
 
 const { app } = require('electron');
+
+// When the Squirrel installer starts, it starts the app multiple times.
+// eslint-disable-next-line global-require
+if (require('electron-squirrel-startup')) {
+  app.quit();
+
+  return;
+}
+
 const FlyoutWin = require('../flyout/flyout-win');
 
 let flyoutWin = null;

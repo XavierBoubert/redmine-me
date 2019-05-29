@@ -34,6 +34,9 @@
 
     <label>Your email (to display your gravatar)</label>
     <input type="text" @input="emailChange" :value="email">
+
+    <h2>Debug</h2>
+    <button @click="openDevtools">Open the dev tools</button>
   </div>
 </template>
 
@@ -41,6 +44,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import store from '@/services/store';
 import { mapState } from 'vuex';
+import { ipcRenderer } from 'electron';
 
 export default {
   name: 'options',
@@ -70,6 +74,9 @@ export default {
     },
     emailChange(event) {
       this.$store.dispatch('Options/changeEmail', event.target.value);
+    },
+    openDevtools() {
+      ipcRenderer.send('devtools:open');
     },
   },
 };
@@ -125,6 +132,20 @@ export default {
     border: none;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
+  }
+
+  button {
+    cursor: pointer;
+    outline: none;
+    background: none;
+    border: none;
+    border-radius: 3px;
+    box-sizing: border-box;
+    height: 28px;
+    line-height: 1em;
+    padding: 2px 8px;
+    background: #4eb0f4;
+    color: #111;
   }
 }
 </style>

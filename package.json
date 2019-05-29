@@ -1,5 +1,5 @@
 {
-  "name": "redmineme",
+  "name": "redmine-me",
   "version": "0.0.1",
   "description": "Track your Redmine times",
   "main": "src/bootstrap/index.js",
@@ -29,17 +29,25 @@
     "type": "git",
     "url": "git+ssh://git@bitbucket.org/xavierboubert/redmine-me.git"
   },
-  "author": "Xavier Boubert",
+  "author": "Xavier Boubert <xavier@boubert.fr>",
   "license": "MIT",
   "homepage": "https://github.com/XavierBoubert/redmine-me#readme",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "overwrite": true,
+        "prune": true,
+        "asar": true,
+        "iconUrl": "./src/build/logo.ico",
+        "setupIcon": "./src/build/logo.ico",
+        "title": "Redmine me",
+        "exe": "Redmine me.exe"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "redmine_me"
+            "name": "redmine-me"
           }
         },
         {
@@ -72,6 +80,7 @@
     }
   },
   "dependencies": {
+    "dotenv": "^8.0.0",
     "electron-squirrel-startup": "^1.0.0"
   },
   "devDependencies": {
@@ -88,7 +97,6 @@
     "axios": "^0.18.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-import-glob": "^2.0.0",
-    "dotenv": "^6.2.0",
     "electron": "5.0.2",
     "eslint": "^5.8.0",
     "eslint-config-airbnb": "^17.1.0",

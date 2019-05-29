@@ -6,11 +6,11 @@ const { BrowserWindow, ipcMain, shell } = electron;
 
 const WIN_URL = process.env.LOCAL === 'true'
   ? 'http://localhost:9005/'
-  : `file://${process.cwd()}/dist/index.html`;
+  : `file://${process.cwd()}/resources/app.asar/dist/index.html`;
 const PANELS = {
-  none: { width: (250 + 5), height: 74 },
+  none: { width: (250 + 5), height: 64 },
   activity: { width: 580, height: 350 },
-  options: { width: 380, height: 580 },
+  options: { width: 380, height: 650 },
 };
 
 class FlyoutWin {
@@ -23,6 +23,7 @@ class FlyoutWin {
     });
 
     ipcMain.on('browser:open', (event, { url }) => shell.openExternal(url));
+    ipcMain.on('devtools:open', () => this.win.webContents.openDevTools({ mode: 'detach' }));
   }
 
   async open() {
