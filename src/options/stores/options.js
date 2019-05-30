@@ -33,7 +33,7 @@ const store = {
       Vue.set(state, 'maxHours', maxHours);
     },
     changeEmail: (state, email) => {
-      const avatar = email ? `https://www.gravatar.com/avatar/${md5(email)}?s=200` : null;
+      const avatar = email ? `https://www.gravatar.com/avatar/${md5(email)}?s=200` : '';
 
       localStorage.setItem('email', email);
       localStorage.setItem('avatar', avatar);

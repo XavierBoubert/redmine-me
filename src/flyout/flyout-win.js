@@ -53,6 +53,18 @@ class FlyoutWin {
     });
   }
 
+  focus() {
+    if (!this.win) {
+      return;
+    }
+
+    if (this.win.isMinimized()) {
+      this.win.restore();
+    }
+
+    this.win.focus();
+  }
+
   destroyWin() {
     this.win.close();
     this.win = null;
@@ -71,7 +83,7 @@ class FlyoutWin {
         icon: path.join(__dirname, './assets/logo.png'),
         width: (250 + 14),
         height: 74,
-        acceptFirstMouse: false,
+        acceptFirstMouse: true,
         transparent: true,
         frame: false,
         resizable: false,

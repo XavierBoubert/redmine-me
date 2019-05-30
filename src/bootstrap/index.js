@@ -11,12 +11,27 @@ if (require('electron-squirrel-startup')) {
   return;
 }
 
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+
+  return;
+}
+
 const FlyoutWin = require('../flyout/flyout-win');
 
 let flyoutWin = null;
 
 // Used to autoplay audios & videos without the user consent
 app.commandLine.appendSwitch('--autoplay-policy', 'no-user-gesture-required');
+
+// The user tried to run a second instance
+app.on('second-instance', () => {
+  if (!flyoutWin) {
+    return;
+  }
+
+  flyoutWin.focus();
+});
 
 const startFlyout = () => {
   if (flyoutWin) {

@@ -1,6 +1,7 @@
 {
   "name": "redmine-me",
-  "version": "0.0.1",
+  "productName": "Redmine me",
+  "version": "0.1.0",
   "description": "Track your Redmine times",
   "main": "src/bootstrap/index.js",
   "private": true,
@@ -10,6 +11,7 @@
   },
   "scripts": {
     "start": "electron-forge start",
+    "m": "electron-forge make",
     "make": "npm run build && electron-forge make",
     "package": "npm run build && electron-forge package",
     "publish": "electron-forge publish",
@@ -29,25 +31,25 @@
     "type": "git",
     "url": "git+ssh://git@bitbucket.org/xavierboubert/redmine-me.git"
   },
-  "author": "Xavier Boubert <xavier@boubert.fr>",
+  "author": "Xavier Boubert <xavier@boubert.fr> (https://github.com/xavierboubert)",
   "license": "MIT",
-  "homepage": "https://github.com/XavierBoubert/redmine-me#readme",
+  "homepage": "https://github.com/XavierBoubert/redmine-me",
   "config": {
     "forge": {
       "packagerConfig": {
         "overwrite": true,
         "prune": true,
         "asar": true,
-        "iconUrl": "./src/build/logo.ico",
-        "setupIcon": "./src/build/logo.ico",
-        "title": "Redmine me",
-        "exe": "Redmine me.exe"
+        "icon": "resources/icon.ico",
+        "executableName": "Redmine me"
       },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "redmine-me"
+            "exe": "Redmine me.exe",
+            "icon": "resources/icon.ico",
+            "setupIcon": "resources/icon.ico"
           }
         },
         {

@@ -9,8 +9,11 @@ npm i -g yarn
 # Install the dependencies
 yarn install
 
-# Build the app assets
-npm run build
+# Create your env and configure it
+cp .env.dist .env
+
+# Build & serve the app assets
+npm run serve
 
 # Start the electron app
 npm start
@@ -18,6 +21,8 @@ npm start
 
 ## Roadmap
 
+- build in every os
+- add a tray icon
 - app single instance
 - app auto reload
 - Refactor: the activeIssue has to be inside the issues
