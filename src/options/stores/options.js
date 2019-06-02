@@ -20,6 +20,7 @@ const store = {
     maxHours: localStorage.getItem('max-hours') || null,
     email: localStorage.getItem('email') || null,
     avatar: localStorage.getItem('avatar') || null,
+    systemStarts: localStorage.getItem('systemStarts') === 'true',
     version: VERSION,
     versionLatest: null,
     versionUpdateUrl: null,
@@ -49,6 +50,11 @@ const store = {
       Vue.set(state, 'email', email);
       Vue.set(state, 'avatar', avatar);
     },
+    changeSystemStarts: (state, systemStarts) => {
+      localStorage.setItem('systemStarts', systemStarts);
+
+      Vue.set(state, 'systemStarts', systemStarts);
+    },
     changeLatestVersion: (state, data) => {
       const versionLatest = data.name.replace('v', '');
 
@@ -70,6 +76,9 @@ const store = {
     },
     changeEmail({ commit }, email) {
       commit('changeEmail', email);
+    },
+    changeSystemStarts({ commit }, systemStarts) {
+      commit('changeSystemStarts', systemStarts);
     },
     async checkUpdate({ commit }) {
       try {

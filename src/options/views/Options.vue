@@ -35,6 +35,11 @@
     <label>Your email (to display your gravatar)</label>
     <input type="text" @input="emailChange" :value="email">
 
+    <label>
+      <input type="checkbox" value="true" :checked="systemStarts" @input="systemStartsChange">
+      Start the app when your system starts
+    </label>
+
     <h2>Debug</h2>
     <button @click="openDevtools">Open the dev tools</button>
     <button @click="checkUpdate">Check for updates</button>
@@ -56,6 +61,7 @@ export default {
   computed: {
     ...mapState('Options', [
       'redmineUrl', 'redmineUsername', 'redminePassword', 'defaultActivity', 'maxHours', 'email',
+      'systemStarts',
     ]),
     ...mapState('Redmine', ['network', 'activities']),
   },
@@ -75,6 +81,13 @@ export default {
     },
     emailChange(event) {
       this.$store.dispatch('Options/changeEmail', event.target.value);
+    },
+    systemStartsChange(event) {
+      const enable = event.target.checked;
+
+      ipcRenderer.send('options:auto-launch', { enable });
+
+      this.$store.dispatch('Options/changeSystemStarts', enable);
     },
     openDevtools() {
       ipcRenderer.send('devtools:open');
@@ -113,17 +126,20 @@ export default {
   }
 
   h1 {
+    user-select: none;
     font-size: 23px;
     margin-bottom: 20px;
   }
 
   h2 {
+    user-select: none;
     font-size: 16px;
     font-weight: bold;
     margin: 20px 0 10px;
   }
 
   label {
+    user-select: none;
     display: block;
     margin-bottom: 5px;
     font-size: 13px;
@@ -136,6 +152,31 @@ export default {
     border: none;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
+  }
+
+  input[type="checkbox"] {
+    -webkit-appearance: none;
+    display: inline-block;
+    position: relative;
+    top: 5px;
+    width: auto;
+    margin: 0 10px 0 0;
+    padding: 10px;
+    border-radius: 50%;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      bottom: 5px;
+      border-radius: 50%;
+    }
+
+    &:checked::before {
+      background: #fff;
+    }
   }
 
   button {

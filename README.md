@@ -21,10 +21,9 @@ npm start
 
 ## Roadmap
 
-- Non need for external assets (font awesome & google font)
+- No need for external assets (font awesome & google font)
 - PWA
 - add a tray icon
-- app single instance
 - Refactor: the activeIssue has to be inside the issues
 - Panel activity
   - Actual day

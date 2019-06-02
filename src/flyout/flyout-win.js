@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const path = require('path');
 const electron = require('electron');
+const AutoLaunch = require('auto-launch');
 
 const { BrowserWindow, ipcMain, shell } = electron;
 
@@ -10,8 +11,10 @@ const WIN_URL = process.env.LOCAL === 'true'
 const PANELS = {
   none: { width: (250 + 5), height: 64 },
   activity: { width: 580, height: 350 },
-  options: { width: 380, height: 650 },
+  options: { width: 380, height: 675 },
 };
+
+const autoLaunch = new AutoLaunch({ name: 'Redmine me' });
 
 class FlyoutWin {
   constructor() {
@@ -24,6 +27,10 @@ class FlyoutWin {
 
     ipcMain.on('browser:open', (event, { url }) => shell.openExternal(url));
     ipcMain.on('devtools:open', () => this.win.webContents.openDevTools({ mode: 'detach' }));
+    ipcMain.on(
+      'options:auto-launch',
+      (event, { enable }) => autoLaunch[enable ? 'enable' : 'disable'](),
+    );
   }
 
   async open() {
