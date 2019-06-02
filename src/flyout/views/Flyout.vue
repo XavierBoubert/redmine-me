@@ -118,16 +118,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../assets/reset.scss';
-
-:root {
-  --color-primary: #29547a;
-  --color-background: #121b1e;
-}
-
-html, body {
-  overflow: hidden;
-}
+@import '../assets/page.scss';
 </style>
 
 <style lang="scss" scoped>

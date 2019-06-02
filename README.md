@@ -21,8 +21,6 @@ npm start
 
 ## Roadmap
 
-- No need for external assets (font awesome & google font)
-- PWA
 - add a tray icon
 - Refactor: the activeIssue has to be inside the issues
 - Panel activity
