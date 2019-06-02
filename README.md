@@ -21,10 +21,10 @@ npm start
 
 ## Roadmap
 
-- build in every os
+- Non need for external assets (font awesome & google font)
+- PWA
 - add a tray icon
 - app single instance
-- app auto reload
 - Refactor: the activeIssue has to be inside the issues
 - Panel activity
   - Actual day

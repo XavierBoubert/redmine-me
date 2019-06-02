@@ -1,9 +1,14 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import Vue from 'vue';
 import md5 from 'md5';
+import axios from 'axios';
 import api from '@/redmine/api';
+import { remote } from 'electron';
 
 const name = 'Options';
+
+const LATEST_RELEASE_URL = 'https://api.github.com/repos/xavierboubert/redmine-me/releases/latest';
+const VERSION = remote.app.getVersion();
 
 const store = {
   namespaced: true,
@@ -15,6 +20,9 @@ const store = {
     maxHours: localStorage.getItem('max-hours') || null,
     email: localStorage.getItem('email') || null,
     avatar: localStorage.getItem('avatar') || null,
+    version: VERSION,
+    versionLatest: null,
+    versionUpdateUrl: null,
   },
   mutations: {
     changeRedmine: (state, { url, username, password }) => {
@@ -41,6 +49,12 @@ const store = {
       Vue.set(state, 'email', email);
       Vue.set(state, 'avatar', avatar);
     },
+    changeLatestVersion: (state, data) => {
+      const versionLatest = data.name.replace('v', '');
+
+      Vue.set(state, 'versionLatest', versionLatest);
+      Vue.set(state, 'versionUpdateUrl', versionLatest !== state.version ? data.html_url : null);
+    },
   },
   actions: {
     changeRedmine({ commit, dispatch }, { url, username, password }) {
@@ -56,6 +70,16 @@ const store = {
     },
     changeEmail({ commit }, email) {
       commit('changeEmail', email);
+    },
+    async checkUpdate({ commit }) {
+      try {
+        const { data } = await axios.get(LATEST_RELEASE_URL);
+
+        commit('changeLatestVersion', data);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.err(err);
+      }
     },
   },
 };

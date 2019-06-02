@@ -19,6 +19,11 @@
       <div class="error-text" v-if="error">{{ error }}</div>
 
       <button
+        v-if="versionUpdateUrl"
+        class="version-update far fa-arrow-alt-circle-up"
+        @click="openVersionUpdateUrl"
+      ></button>
+      <button
         ref="buttonSheet"
         class="sheet far fa-clock"
         :class="{ active: panels.activity }"
@@ -62,6 +67,7 @@ export default {
     }
 
     this.$store.dispatch('Redmine/test');
+    this.$store.dispatch('Options/checkUpdate');
   },
   data() {
     return {
@@ -74,7 +80,7 @@ export default {
   },
   computed: {
     ...mapState('Redmine', ['error', 'activeIssue']),
-    ...mapState('Options', ['avatar']),
+    ...mapState('Options', ['avatar', 'versionUpdateUrl']),
   },
   methods: {
     togglePanel(name) {
@@ -94,6 +100,9 @@ export default {
       this.inputTimeout = setTimeout(() => {
         this.$store.dispatch('Redmine/pullActiveIssue', event.target.value);
       }, 500);
+    },
+    openVersionUpdateUrl() {
+      ipcRenderer.send('browser:open', { url: this.versionUpdateUrl });
     },
     openActiveIssue() {
       if (!this.activeIssue.id || this.activeIssue.error) {
@@ -236,7 +245,7 @@ html, body {
       }
     }
 
-    .sheet, .options {
+    .version-update, .sheet, .options {
       cursor: pointer;
       position: absolute;
       top: 3px;
@@ -261,6 +270,16 @@ html, body {
 
     .sheet {
       right: 45px;
+    }
+
+    .version-update {
+      right: 65px;
+      color: #5ddc6c;
+      opacity: 1;
+
+      &:hover, &.active {
+        color: #5ddc6c;
+      }
     }
 
     &:hover {

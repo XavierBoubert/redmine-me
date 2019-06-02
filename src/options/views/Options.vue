@@ -37,6 +37,7 @@
 
     <h2>Debug</h2>
     <button @click="openDevtools">Open the dev tools</button>
+    <button @click="checkUpdate">Check for updates</button>
   </div>
 </template>
 
@@ -77,6 +78,9 @@ export default {
     },
     openDevtools() {
       ipcRenderer.send('devtools:open');
+    },
+    checkUpdate() {
+      this.$store.dispatch('Options/checkUpdate');
     },
   },
 };
@@ -135,17 +139,18 @@ export default {
   }
 
   button {
+    display: inline-block;
     cursor: pointer;
     outline: none;
-    background: none;
+    height: 28px;
+    margin-right: 10px;
+    padding: 2px 8px;
     border: none;
     border-radius: 3px;
     box-sizing: border-box;
-    height: 28px;
     line-height: 1em;
-    padding: 2px 8px;
-    background: #4eb0f4;
-    color: #111;
+    background: #2c80bb;
+    color: #fff;
   }
 }
 </style>

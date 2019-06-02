@@ -14,7 +14,7 @@
     "m": "electron-forge make",
     "make": "npm run build && electron-forge make",
     "package": "npm run build && electron-forge package",
-    "publish": "electron-forge publish",
+    "publish": "npm run build && electron-forge publish",
     "serve": "vue-cli-service serve --port 9005 ./src/flyout/index.js",
     "build": "vue-cli-service build ./src/flyout/index.js",
     "lint": "vue-cli-service lint",
