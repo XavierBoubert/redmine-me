@@ -7,7 +7,7 @@ const { BrowserWindow, ipcMain, shell } = electron;
 
 const WIN_URL = process.env.LOCAL === 'true'
   ? 'http://localhost:9005/'
-  : `file://${process.cwd()}/resources/app.asar/dist/index.html`;
+  : `file://${path.resolve(__dirname)}/../../dist/index.html`;
 const PANELS = {
   none: { width: (250 + 5), height: 64 },
   activity: { width: 580, height: 350 },
