@@ -59,7 +59,18 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "productName": "Redmine me",
+            "genericName": "Redmine me",
+            "desktop": {
+              "Name": "Redmine me",
+              "Comment": "Track your Redmine times",
+              "Type": "Application",
+              "Icon": "resources/icon.png",
+              "StartupNotify": "true",
+              "Categories": "Utility"
+            }
+          }
         }
       ],
       "publishers": [
@@ -70,7 +81,7 @@
               "owner": "xavierboubert",
               "name": "redmine-me"
             },
-            "prerelease": true
+            "prerelease": false
           }
         }
       ]

@@ -155,7 +155,7 @@ export default {
     }
 
     .logo {
-      background: url("../assets/logo.png") no-repeat;
+      background: url("../assets/icon.png") no-repeat;
       background-size: 93%;
       background-position: center;
     }

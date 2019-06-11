@@ -4,7 +4,6 @@ const electron = require('electron');
 const AutoLaunch = require('auto-launch');
 
 const { BrowserWindow, ipcMain, shell } = electron;
-
 const WIN_URL = process.env.LOCAL === 'true'
   ? 'http://localhost:9005/'
   : `file://${path.resolve(__dirname)}/../../dist/index.html`;
@@ -87,8 +86,8 @@ class FlyoutWin {
 
       this.win = new BrowserWindow({
         title: 'Redmine me',
-        icon: path.join(__dirname, './assets/logo.png'),
-        width: (250 + 14),
+        icon: path.join(__dirname, 'assets/icon.png'),
+        width: 250 + 14,
         height: 74,
         acceptFirstMouse: true,
         transparent: true,
@@ -98,7 +97,7 @@ class FlyoutWin {
         maximizable: false,
         fullscreenable: false,
         hasShadow: false,
-        skipTaskbar: true,
+        skipTaskbar: false,
         show: false,
         webSecurity: false,
         webPreferences: {
