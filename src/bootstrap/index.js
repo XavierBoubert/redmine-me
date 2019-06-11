@@ -17,46 +17,42 @@ if (!app.requestSingleInstanceLock()) {
   return;
 }
 
-const FlyoutWin = require('../flyout/flyout-win');
+const createTray = require('../tray');
 
-let flyoutWin = null;
+let tray = null;
 
 // Used to autoplay audios & videos without the user consent
 app.commandLine.appendSwitch('--autoplay-policy', 'no-user-gesture-required');
 
 // The user tried to run a second instance
 app.on('second-instance', () => {
-  if (!flyoutWin) {
+  if (!tray) {
     return;
   }
 
-  flyoutWin.focus();
+  tray.focus();
 });
 
-const startFlyout = () => {
-  if (flyoutWin) {
+const startTray = () => {
+  if (tray) {
+    tray.focus();
+
     return;
   }
 
-  flyoutWin = new FlyoutWin();
-  flyoutWin.open();
+  tray = createTray();
 };
 
 app.on('ready', () => {
-  if (process.platform === 'linux') { 
-    setTimeout(() => startFlyout(), 1000);
+  if (process.platform === 'linux') {
+    setTimeout(() => startTray(), 1000);
   } else {
-    startFlyout();
-  } 
-});
-
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
+    startTray();
   }
 });
 
-app.on('activate', () => startFlyout());
+// If we don't subscribe to this event, Electron tries to quit
+// when the last window closed
+app.on('window-all-closed', () => { });
+
+app.on('activate', () => startTray());

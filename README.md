@@ -41,6 +41,7 @@ npm start
 
 ## Roadmap
 
+- At midnight, the tasks have to be cleared
 - add a tray icon
 - Refactor: the activeIssue has to be inside the issues
 - Panel activity
