@@ -43,6 +43,8 @@
       <activity v-if="panels.activity" @close="togglePanel('activity')" />
       <options v-if="panels.options" @close="togglePanel('options')" />
     </div>
+
+    <image-generator :text="idTruncate" :width="32" :height="32" @image="idImageChange" />
   </div>
 </template>
 
@@ -54,11 +56,12 @@ import api from '@/redmine/api';
 import store from '@/services/store';
 import Activity from '@/activity/views/Activity.vue';
 import Options from '@/options/views/Options.vue';
+import ImageGenerator from '@/image-generator/views/ImageGenerator.vue';
 
 export default {
   name: 'flyout',
   store,
-  components: { Activity, Options },
+  components: { Activity, Options, ImageGenerator },
   mounted() {
     setTimeout(() => this.$refs.buttonSheet.focus());
 
@@ -81,6 +84,9 @@ export default {
   computed: {
     ...mapState('Redmine', ['error', 'activeIssue']),
     ...mapState('Options', ['avatar', 'versionUpdateUrl']),
+    idTruncate() {
+      return ((this.activeIssue && this.activeIssue.id) || '').toString().slice(-3);
+    },
   },
   methods: {
     togglePanel(name) {
@@ -112,6 +118,9 @@ export default {
       ipcRenderer.send('browser:open', {
         url: `${api.url}/issues/${this.activeIssue.id}`,
       });
+    },
+    idImageChange(src) {
+      ipcRenderer.send('tray:image', { src });
     },
   },
 };

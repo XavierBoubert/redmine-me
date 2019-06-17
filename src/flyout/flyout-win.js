@@ -15,6 +15,8 @@ const PANELS = {
 
 const autoLaunch = new AutoLaunch({ name: 'Redmine me' });
 
+const onIdImageChangeEvents = [];
+
 class FlyoutWin {
   constructor() {
     ipcMain.on('panel:opened', (event, { name, opened }) => {
@@ -30,6 +32,14 @@ class FlyoutWin {
       'options:auto-launch',
       (event, { enable }) => autoLaunch[enable ? 'enable' : 'disable'](),
     );
+    ipcMain.on('tray:image', (event, { src }) => onIdImageChangeEvents.forEach(fn => fn(src)));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  onIdImageChange(fn) {
+    onIdImageChangeEvents.push(fn);
+
+    return () => onIdImageChangeEvents.splice(onIdImageChangeEvents.indexOf(fn), 1);
   }
 
   async open() {
@@ -97,7 +107,7 @@ class FlyoutWin {
         maximizable: false,
         fullscreenable: false,
         hasShadow: false,
-        skipTaskbar: false,
+        skipTaskbar: true,
         show: false,
         webSecurity: false,
         webPreferences: {
