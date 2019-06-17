@@ -85,7 +85,17 @@ export default {
     ...mapState('Redmine', ['error', 'activeIssue']),
     ...mapState('Options', ['avatar', 'versionUpdateUrl']),
     idTruncate() {
-      return ((this.activeIssue && this.activeIssue.id) || '').toString().slice(-3);
+      return this.error || this.activeIssue.error || !this.activeIssue.id
+        ? ''
+        : this.activeIssue.id.toString().slice(-3);
+    },
+  },
+  watch: {
+    activeIssue() {
+      this.refreshTrayImage();
+    },
+    error() {
+      this.refreshTrayImage();
     },
   },
   methods: {
@@ -120,7 +130,18 @@ export default {
       });
     },
     idImageChange(src) {
-      ipcRenderer.send('tray:image', { src });
+      this.refreshTrayImage(src);
+    },
+    refreshTrayImage(src) {
+      if (this.error || this.activeIssue.error || !this.activeIssue.id) {
+        ipcRenderer.send('tray:image', { src: null });
+
+        return;
+      }
+
+      if (src) {
+        ipcRenderer.send('tray:image', { src });
+      }
     },
   },
 };

@@ -27,14 +27,25 @@ module.exports = () => {
   if (!flyoutWin) {
     flyoutWin = new FlyoutWin();
     flyoutWin.onIdImageChange((src) => {
+      if (!src) {
+        tray.setImage(trayIcon(false));
+
+        return;
+      }
+
       fs.writeFileSync(trayImagePath, src, 'base64');
       tray.setImage(trayImagePath);
     });
   }
 
-  tray.on('click', () => flyoutWin.open());
+  tray.on('click', () => flyoutWin.toggleOpenClose());
 
   const contextMenu = Menu.buildFromTemplate([{
+    label: 'Open/Close',
+    click() {
+      flyoutWin.toggleOpenClose();
+    },
+  }, {
     label: 'Quit',
     click() {
       tray.destroy();

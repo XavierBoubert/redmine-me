@@ -69,6 +69,10 @@ class FlyoutWin {
     });
   }
 
+  toggleOpenClose() {
+    this[this.win ? 'close' : 'open']();
+  }
+
   focus() {
     if (!this.win) {
       return;

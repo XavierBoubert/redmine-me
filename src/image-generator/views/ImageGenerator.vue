@@ -1,5 +1,5 @@
 <template>
-  <div class="image-generator">
+  <div class="image-generator">{{ text }}
     <canvas
       ref="canvas"
       :style="`width: ${width}px; height: ${height}px`"
@@ -35,6 +35,10 @@ export default {
   },
   methods: {
     generateImage() {
+      if (!this.text) {
+        return;
+      }
+
       const { context } = this;
       const size = {
         width: context.canvas.clientWidth,
