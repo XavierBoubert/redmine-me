@@ -30,12 +30,12 @@ app.on('second-instance', () => {
     return;
   }
 
-  tray.focus();
+  tray.activateAction();
 });
 
 const startTray = () => {
   if (tray) {
-    tray.focus();
+    tray.activateAction();
 
     return;
   }

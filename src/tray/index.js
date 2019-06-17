@@ -55,5 +55,7 @@ module.exports = () => {
 
   tray.setContextMenu(contextMenu);
 
+  tray.activateAction = () => flyoutWin.open();
+
   return tray;
 };
