@@ -5,8 +5,8 @@ const AutoLaunch = require('auto-launch');
 
 const { BrowserWindow, ipcMain, shell } = electron;
 const WIN_URL = process.env.LOCAL === 'true'
-  ? 'http://localhost:9005/'
-  : `file://${path.resolve(__dirname)}/../../dist/index.html`;
+  ? 'http://localhost:9005#/flyout'
+  : `file://${path.resolve(__dirname)}/../../dist/index.html#/flyout`;
 const PANELS = {
   none: { width: (250 + 5), height: 64 },
   activity: { width: 580, height: 350 },
@@ -121,11 +121,11 @@ class FlyoutWin {
 
       this.win.setMenu(null);
 
-      if (process.env.DEBUG === 'true') {
+      // if (process.env.DEBUG === 'true') {
         this.win.webContents.openDevTools({
           mode: 'detach',
         });
-      }
+      // }
 
       this.win.setAlwaysOnTop(true, 'floating', 1);
 

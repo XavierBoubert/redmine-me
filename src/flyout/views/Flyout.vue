@@ -147,12 +147,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import '../assets/page.scss';
-</style>
-
 <style lang="scss" scoped>
-@import '../assets/mixins';
+@import '@/layouts/assets/mixins.scss';
 
 .flyout {
   .issue {
