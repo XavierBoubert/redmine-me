@@ -1,7 +1,7 @@
 {
   "name": "redmine-me",
   "productName": "Redmine me",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Track your Redmine times",
   "main": "src/bootstrap/index.js",
   "private": true,
