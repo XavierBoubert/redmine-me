@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const { Menu, Tray, app } = require('electron');
 const FlyoutWin = require('../flyout/flyout-win');
+const panelWin = require('../panel/panel-win');
+// const panelParentWin = require('../panel/panel-parent-win');
 
 const appPath = app.getPath('userData');
 const trayImagePath = path.join(appPath, 'tray.png');
@@ -44,6 +46,12 @@ module.exports = () => {
     label: 'Open/Close',
     click() {
       flyoutWin.toggleOpenClose();
+    },
+  }, {
+    label: 'Toggle panel',
+    click() {
+      panelWin.toggleOpenClose();
+      // panelParentWin.toggleOpenClose();
     },
   }, {
     label: 'Quit',
