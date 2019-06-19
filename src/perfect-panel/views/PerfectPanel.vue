@@ -1,16 +1,22 @@
 <template>
-  <div id="app" class="perfect-panel">
-    <div
-      class="perfect-panel-container"
-      :style="`width: ${width}px; height: ${height}px; top: ${top}px; left: ${left}px;`"
-      @contextmenu="onContextmenu"
-    >
-      <h1>Panel</h1>
+  <div
+    id="app"
+    class="perfect-panel"
+    @contextmenu="dragging = !dragging"
+    @mousedown="onMouseDown"
+    @mouseup="onMouseUp"
+    @touchstart="onMouseDown"
+    @touchend="onMouseUp"
+  >
+    <div class="dragging-mask" v-if="dragging"></div>
 
-      <div class="perfect-panel-content">
-        <router-view />
-      </div>
+    <h1>Panel</h1>
+
+    <div class="perfect-panel-content">
+      <router-view />
     </div>
+
+    <button class="dragging-stop" v-if="dragging" @click="dragging = false">x</button>
   </div>
 </template>
 
@@ -21,39 +27,40 @@ import { ipcRenderer } from 'electron';
 export default {
   name: 'perfect-panel',
   mounted() {
-    ipcRenderer.on('main:size', (event, size) => this.updateSize(size));
-    ipcRenderer.on('main:drag:position', async (event, position) => {
-      this.updatePosition(position);
-
-      // await this.$nextTick();
-
-      setTimeout(() => ipcRenderer.send('renderer:drag:ready'));
-
-      // ipcRenderer.send('renderer:drag:ready');
-    });
-    ipcRenderer.on('main:drag:done', () => this.updatePosition({ x: 0, y: 0 }));
-
     ipcRenderer.send('renderer:ready');
   },
   data() {
     return {
-      top: 0,
-      left: 0,
-      width: 250,
-      height: 250,
+      dragging: false,
+      animationId: null,
+      mouseX: null,
+      mouseY: null,
+      drag: false,
     };
   },
   methods: {
-    updateSize(size) {
-      this.$set(this, 'width', size.width);
-      this.$set(this, 'height', size.height);
+    onMouseDown(event) {
+      console.log('start');
+
+      const e = event.touches && event.touches.length ? event.touches[0] : event;
+
+      console.log(e.clientX, e.clientY);
+
+      ipcRenderer.send('drag:start', { x: e.clientX, y: e.clientY });
     },
-    updatePosition(position) {
-      this.$set(this, 'left', position.x);
-      this.$set(this, 'top', position.y);
+    onMouseUp() {
+      console.log('stop');
+
+      ipcRenderer.send('drag:stop');
     },
-    onContextmenu() {
-      ipcRenderer.send('renderer:drag:toggle', { x: this.left, y: this.top });
+    refreshMousePosition() {
+      if (!this.drag) {
+        return;
+      }
+
+      ipcRenderer.send('drag:stop');
+
+      setTimeout(() => this.refreshMousePosition(), 10);
     },
   },
 };
@@ -65,43 +72,61 @@ export default {
 
 <style lang="scss" scoped>
 .perfect-panel {
+  user-select: none;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 0, 0, 0.2);
-  color: white;
+  background: yellow;
+  color: black;
 
-  .perfect-panel-container {
+  .dragging-mask {
+    -webkit-app-region: drag;
     position: absolute;
-    background: yellow;
-    color: black;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: orange;
+  }
 
-    h1 {
-      -webkit-app-region: drag;
-      box-sizing: border-box;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 20px;
-      margin: 0;
-      padding: 1px 5px;
-      background: red;
-      font-size: 15px;
-      font-family: sans-serif;
-      font-weight: normal;
-      color: white;
-    }
+  .dragging-stop {
+    -webkit-app-region: no-drag;
+    outline: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: blue;
+    color: red;
+  }
 
-    .perfect-panel-content {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      bottom: 20px;
-    }
+  h1 {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    margin: 0;
+    padding: 1px 5px;
+    background: red;
+    font-size: 15px;
+    font-family: sans-serif;
+    font-weight: normal;
+    color: white;
+  }
+
+  .perfect-panel-content {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
   }
 }
 </style>

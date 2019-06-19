@@ -6,6 +6,8 @@ const panelWin = new PerfectPanelWin({
   debug: true,
   window: {
     icon: path.join(__dirname, 'assets/icon.png'),
+    width: 250,
+    height: 250,
   },
 });
 
