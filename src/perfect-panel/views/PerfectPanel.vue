@@ -1,13 +1,5 @@
 <template>
-  <div
-    id="app"
-    class="perfect-panel"
-    @contextmenu="dragging = !dragging"
-    @mousedown="onMouseDown"
-    @mouseup="onMouseUp"
-    @touchstart="onMouseDown"
-    @touchend="onMouseUp"
-  >
+  <div id="app" class="perfect-panel" @contextmenu="dragging = !dragging">
     <div class="dragging-mask" v-if="dragging"></div>
 
     <h1>Panel</h1>
@@ -32,36 +24,7 @@ export default {
   data() {
     return {
       dragging: false,
-      animationId: null,
-      mouseX: null,
-      mouseY: null,
-      drag: false,
     };
-  },
-  methods: {
-    onMouseDown(event) {
-      console.log('start');
-
-      const e = event.touches && event.touches.length ? event.touches[0] : event;
-
-      console.log(e.clientX, e.clientY);
-
-      ipcRenderer.send('drag:start', { x: e.clientX, y: e.clientY });
-    },
-    onMouseUp() {
-      console.log('stop');
-
-      ipcRenderer.send('drag:stop');
-    },
-    refreshMousePosition() {
-      if (!this.drag) {
-        return;
-      }
-
-      ipcRenderer.send('drag:stop');
-
-      setTimeout(() => this.refreshMousePosition(), 10);
-    },
   },
 };
 </script>
