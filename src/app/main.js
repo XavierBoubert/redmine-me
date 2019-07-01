@@ -17,12 +17,14 @@ if (!app.requestSingleInstanceLock()) {
   return;
 }
 
-const createTray = require('../tray');
-
-let tray = null;
-
 // Used to autoplay audios & videos without the user consent
 app.commandLine.appendSwitch('--autoplay-policy', 'no-user-gesture-required');
+
+const PerfectPanelGroup = require('../perfect-panel/perfect-panel-group');
+const createTray = require('../tray');
+
+const group = new PerfectPanelGroup();
+let tray = null;
 
 // The user tried to run a second instance
 app.on('second-instance', () => {
@@ -40,7 +42,7 @@ const startTray = () => {
     return;
   }
 
-  tray = createTray();
+  tray = createTray(group);
 };
 
 app.on('ready', () => {

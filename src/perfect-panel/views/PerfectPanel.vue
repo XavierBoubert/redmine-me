@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="perfect-panel" @contextmenu="dragging = !dragging">
+  <div id="app" class="perfect-panel" @contextmenu="startDragging">
     <div class="dragging-mask" v-if="dragging"></div>
 
     <h1>Panel</h1>
@@ -8,7 +8,7 @@
       <router-view />
     </div>
 
-    <button class="dragging-stop" v-if="dragging" @click="dragging = false">x</button>
+    <button class="dragging-stop" v-if="dragging" @click="stopDragging">x</button>
   </div>
 </template>
 
@@ -25,6 +25,18 @@ export default {
     return {
       dragging: false,
     };
+  },
+  methods: {
+    startDragging() {
+      this.$set(this, 'dragging', true);
+
+      ipcRenderer.send('renderer:dragging:start');
+    },
+    stopDragging() {
+      this.$set(this, 'dragging', false);
+
+      ipcRenderer.send('renderer:dragging:stop');
+    },
   },
 };
 </script>

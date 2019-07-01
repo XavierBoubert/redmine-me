@@ -25,10 +25,18 @@ class PerfectPanelWin {
     };
     this.win = null;
 
+    this.onMoveBinded = this.onMove.bind(this);
+
     // ipcMain.on('renderer:ready', this.rendererReady.bind(this));
 
     ipcMain.on('browser:open', (event, { url }) => shell.openExternal(url));
     ipcMain.on('devtools:open', () => this.win.webContents.openDevTools({ mode: 'detach' }));
+    ipcMain.on('renderer:dragging:start', () => this.startDragging());
+    ipcMain.on('renderer:dragging:stop', () => this.stopDragging());
+  }
+
+  changeGroup(group) {
+    this.group = group;
   }
 
   async open() {
@@ -110,18 +118,6 @@ class PerfectPanelWin {
 
       this.win.removeMenu();
 
-      // MAGNET
-      // this.win.on('move', () => {
-      //   const { x, y } = this.position();
-
-      //   if (
-      //     (x !== 0 || y !== 0)
-      //     && (x <= 20 && x >= -20 && y <= 20 && y >= -20)
-      //   ) {
-      //     this.position({ x: 0, y: 0 });
-      //   }
-      // });
-
       if (this.options.debug) {
         this.win.webContents.openDevTools({
           mode: 'detach',
@@ -165,6 +161,18 @@ class PerfectPanelWin {
     const [x, y] = this.win.getPosition();
 
     return { x, y };
+  }
+
+  onMove() {
+    console.log('MOVE', this.position());
+  }
+
+  startDragging() {
+    this.win.on('move', this.onMoveBinded);
+  }
+
+  stopDragging() {
+    this.win.removeListener('move', this.onMoveBinded);
   }
 }
 

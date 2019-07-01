@@ -2,20 +2,18 @@
 const path = require('path');
 const fs = require('fs');
 const { Menu, Tray, app } = require('electron');
-const FlyoutWin = require('../flyout/flyout-win');
-const panelWin = require('../panel/panel-win');
-// const panelParentWin = require('../panel/panel-parent-win');
+// const FlyoutWin = require('../flyout/flyout-win');
 
 const appPath = app.getPath('userData');
-const trayImagePath = path.join(appPath, 'tray.png');
+// const trayImagePath = path.join(appPath, 'tray.png');
 
 let tray = null;
-let flyoutWin = null;
+// let flyoutWin = null;
 
 const trayIcon = off => path.resolve(__dirname, process.platform === 'darwin'
   ? `assets/icon-darwin${off ? '-off' : ''}.png` : `assets/icon${off ? '-off' : ''}.png`);
 
-module.exports = () => {
+module.exports = (group) => {
   if (tray) {
     return tray;
   }
@@ -26,44 +24,51 @@ module.exports = () => {
 
   tray = new Tray(trayIcon(false));
 
-  if (!flyoutWin) {
-    flyoutWin = new FlyoutWin();
-    flyoutWin.onIdImageChange((src) => {
-      if (!src) {
-        tray.setImage(trayIcon(false));
+  let panelWin = group.create('panel/panel', 'tray-panel');
+  let panelParentWin = group.create('panel/panel-parent', 'tray-panel-parent');
 
-        return;
-      }
+  // if (!flyoutWin) {
+  //   flyoutWin = new FlyoutWin();
+  //   flyoutWin.onIdImageChange((src) => {
+  //     if (!src) {
+  //       tray.setImage(trayIcon(false));
 
-      fs.writeFileSync(trayImagePath, src, 'base64');
-      tray.setImage(trayImagePath);
-    });
-  }
+  //       return;
+  //     }
 
-  tray.on('click', () => flyoutWin.toggleOpenClose());
+  //     fs.writeFileSync(trayImagePath, src, 'base64');
+  //     tray.setImage(trayImagePath);
+  //   });
+  // }
+
+  const activate = () => {
+    panelWin.toggleOpenClose();
+    panelParentWin.toggleOpenClose();
+  };
+
+  tray.on('click', activate);
 
   const contextMenu = Menu.buildFromTemplate([{
     label: 'Open/Close',
     click() {
-      flyoutWin.toggleOpenClose();
-    },
-  }, {
-    label: 'Toggle panel',
-    click() {
-      panelWin.toggleOpenClose();
-      // panelParentWin.toggleOpenClose();
+      activate();
     },
   }, {
     label: 'Quit',
     click() {
       tray.destroy();
+      group.destroy();
+
+      panelWin = null;
+      panelParentWin = null;
+
       app.quit();
     },
   }]);
 
   tray.setContextMenu(contextMenu);
 
-  tray.activateAction = () => flyoutWin.open();
+  tray.activateAction = activate;
 
   return tray;
 };

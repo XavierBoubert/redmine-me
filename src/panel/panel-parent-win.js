@@ -1,7 +1,7 @@
 const path = require('path');
 const PerfectPanelWin = require('../perfect-panel/perfect-panel-win');
 
-const panelParentWin = new PerfectPanelWin({
+module.exports = () => new PerfectPanelWin({
   route: '/panel-parent',
   debug: true,
   window: {
@@ -10,5 +10,3 @@ const panelParentWin = new PerfectPanelWin({
     height: 250,
   },
 });
-
-module.exports = panelParentWin;
