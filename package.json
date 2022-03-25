@@ -107,7 +107,7 @@
     "axios": "^0.18.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-import-glob": "^2.0.0",
-    "electron": "5.0.2",
+    "electron": "13.6.6",
     "eslint": "^5.8.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-airbnb-base": "^13.1.0",
